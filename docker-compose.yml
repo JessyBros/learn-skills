@@ -1,0 +1,56 @@
+services:
+  php:
+    container_name: learn-skills-php
+    restart: on-failure
+    user: "$UID:$GID"
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    depends_on:
+      - postgres
+    volumes:
+      - ".:/app:rw" # Monte le répertoire courant dans /app en lecture-écriture
+
+  nginx:
+    container_name: learn-skills-nginx
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    depends_on:
+      - php
+    volumes:
+      - ".:/app:ro" # Monte le répertoire courant dans /app en lecture seule
+      - "build:/data/public/build/"
+    ports:
+      - ${PHP_PORT_HTTP:-80}:80
+
+  postgres:
+    container_name: learn-skills-postgres
+    image: postgres:17
+    restart: on-failure
+    environment:
+      POSTGRES_USER: learn_skills
+      POSTGRES_PASSWORD: learn_skills
+      POSTGRES_DB: learn_skills
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  phppgadmin:
+    container_name: learn-skills-phppgadmin
+    image: dpage/pgadmin4:2025-02-06-1
+    restart: on-failure
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-9080}:80"
+    depends_on:
+      - postgres
+
+volumes:
+  build:
+  db:
