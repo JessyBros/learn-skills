@@ -6,3 +6,4 @@ Ce projet a pour but personnel d'apprendre et d'approfondir mes compétences ou 
 - Symfony 7.2
 - Php 8.2
 - Postgres 17
+- Node 23
