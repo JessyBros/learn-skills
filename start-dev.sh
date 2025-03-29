@@ -7,5 +7,5 @@ export DOCKER_GID=$(id -g)
 # Arrête tous les conteneurs Docker en cours d'exécution.
 docker stop $(docker ps -aq)
 
-# Démarre les services définis dans le fichier docker-compose.yml en arrière-plan.
-docker-compose up -d
+# Démarre les services définis dans le fichier docker-compose.yml.
+docker-compose up 
