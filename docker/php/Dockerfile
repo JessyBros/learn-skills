@@ -1,7 +1,6 @@
-FROM php:8.3-fpm
+FROM php:8.4-fpm as base
 
 ARG SYMFONY_CLI_VERSION=stable
-ARG NODE_VERSION=23
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -31,39 +30,29 @@ RUN docker-php-ext-install \
 # Installation de Xdebug
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
-# Nettoyage
-RUN apt-get autoremove -y && apt-get autoclean -y && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# Installation de Node.js
-RUN if [ -n "$NODE_VERSION" ] ; then \
-    curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - && \
-    apt-get update && apt-get install -y --no-install-recommends nodejs && \
-    apt-get autoremove -y && apt-get autoclean -y && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*; \
-    fi
-
 # Configuration PHP-FPM
 RUN echo "access.log = /dev/null" >> /usr/local/etc/php-fpm.d/www.conf
 
+FROM base AS dev
+
+FROM base AS prod
+
 # Copier les fichiers de projet
-COPY composer.json composer.lock ./
 COPY assets assets
 COPY bin bin
 COPY config config
 COPY public public
 COPY src src
-COPY templates templates
+# COPY templates templates
 # COPY tests tests
 # COPY translations translations
-# COPY  package.json package-lock.json webpack.config.js
+COPY composer.json composer.lock ./
+COPY  package.json package-lock.json webpack.config.js ./
 COPY .env ./
 
 # Rendre bin/console exécutable
 RUN chmod +x bin/console
 
-# Changer le propriétaire des fichiers pour www-data
-# RUN chown -R www-data:www-data var/
 
 # Installation des dépendances PHP
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer

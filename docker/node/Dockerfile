@@ -1,9 +1,8 @@
 # build dev assets
 FROM node:23-alpine
 
+# Définir le répertoire de travail
 WORKDIR /app
 
-ENTRYPOINT  ["/bin/sh", "-c"]
-
-# Install on launch, build to produce entrypoints and manifest.json, then watch for changes
-CMD ["npm install && npm run watch"]
+# Installer les dépendances et lancer le processus de développement
+CMD ["sh", "-c", "npm install && npm run watch"]
