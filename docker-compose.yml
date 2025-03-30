@@ -1,29 +1,4 @@
 services:
-  php:
-    container_name: learn-skills-php
-    restart: on-failure
-    user: "$UID:$GID"
-    build:
-      context: .
-      dockerfile: ./docker/php/Dockerfile
-    depends_on:
-      - postgres
-    volumes:
-      - ".:/app:rw" # Monte le répertoire courant dans /app en lecture-écriture
-
-  nginx:
-    container_name: learn-skills-nginx
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: ./docker/nginx/Dockerfile
-    depends_on:
-      - php
-    volumes:
-      - ".:/app:ro" # Monte le répertoire courant dans /app en lecture seule
-      - "build:/data/public/build/"
-    ports:
-      - ${PHP_PORT_HTTP:-80}:80
 
   postgres:
     container_name: learn-skills-postgres
@@ -40,16 +15,55 @@ services:
 
   phppgadmin:
     container_name: learn-skills-phppgadmin
-    image: dpage/pgadmin4:2025-02-06-1
+    image: bitnami/phppgadmin-archived
     restart: on-failure
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      DATABASE_HOST: postgres
     ports:
-      - "${PGADMIN_PORT:-9080}:80"
+      - "${PHPPGADMIN_PORT:-9080}:8080"
+
+  assets:
+    container_name: learn-skills-assets
+    user: "$UID:$GID"
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    environment:
+      SERVER_BASE_URL: ${SERVER_BASE_URL:-workflows}
+    volumes:
+      - ".:/app:rw"
+      - ".npm:/.npm:rw"
+      - "build:/data/public/build/"
+    ports:
+      - ${ENCORE_PORT_HTTP:-8080}:8080
+
+  php:
+    container_name: learn-skills-php
+    restart: on-failure
+    user: "$UID:$GID"
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
     depends_on:
       - postgres
+    volumes:
+      - ".:/app:rw" # Mount the current directory to /app in read-write mode
+    environment:
+      DATABASE_URL: "pgsql://learn_skills:learn_skills@postgres:5432/learn_skills" # Ensure this matches your database settings
+
+  nginx:
+    container_name: learn-skills-nginx
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+    depends_on:
+      - php
+    volumes:
+      - ".:/app:ro" # Mount the current directory to /app in read-only mode
+      - "build:/data/public/build/"
+    ports:
+      - ${PHP_PORT_HTTP:-80}:80
 
   node:
     container_name: learn-skills-node
