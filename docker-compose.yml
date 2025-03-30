@@ -65,6 +65,18 @@ services:
     ports:
       - ${PHP_PORT_HTTP:-80}:80
 
+  node:
+    container_name: learn-skills-node
+    user: "$UID:$GID"
+    restart: on-failure
+    build:
+      context: .
+      dockerfile: ./docker/node/Dockerfile
+    depends_on:
+      - php
+    volumes:
+      - ".:/app:rw" # Monte le répertoire courant dans /app en lecture-écriture
+
 volumes:
   build:
   db:
