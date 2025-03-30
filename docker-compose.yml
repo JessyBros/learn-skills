@@ -77,6 +77,13 @@ services:
     volumes:
       - ".:/app:rw" # Monte le répertoire courant dans /app en lecture-écriture
 
+  mailpit:
+    container_name: learn-skills-mailpit
+    image: axllent/mailpit:latest
+    restart: on-failure
+    ports:
+      - "8025:8025" # Interface Web de Mailpit
+      - "1025:1025" # Port SMTP pour envoyer des e-mails
 volumes:
   build:
   db:
