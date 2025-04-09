@@ -28,11 +28,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/node/Dockerfile
-    environment:
-      SERVER_BASE_URL: ${SERVER_BASE_URL:-workflows}
     volumes:
       - ".:/app:rw"
-      - ".npm:/.npm:rw"
       - "build:/data/public/build/"
     ports:
       - ${ENCORE_PORT_HTTP:-8080}:8080
@@ -45,6 +42,7 @@ services:
       context: .
       dockerfile: ./docker/php/Dockerfile
     depends_on:
+      - assets
       - postgres
     volumes:
       - ".:/app:rw" # Mount the current directory to /app in read-write mode
@@ -64,18 +62,6 @@ services:
       - "build:/data/public/build/"
     ports:
       - ${PHP_PORT_HTTP:-80}:80
-
-  node:
-    container_name: learn-skills-node
-    user: "$UID:$GID"
-    restart: on-failure
-    build:
-      context: .
-      dockerfile: ./docker/node/Dockerfile
-    depends_on:
-      - php
-    volumes:
-      - ".:/app:rw" # Monte le répertoire courant dans /app en lecture-écriture
 
   mailpit:
     container_name: learn-skills-mailpit
