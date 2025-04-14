@@ -63,6 +63,13 @@ services:
     ports:
       - ${PHP_PORT_HTTP:-80}:80
 
+  redis:
+    container_name: learn-skills-redis
+    image: redis:5-alpine
+    restart: on-failure
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
   mailpit:
     container_name: learn-skills-mailpit
     image: axllent/mailpit:latest

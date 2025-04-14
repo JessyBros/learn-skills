@@ -27,6 +27,10 @@ RUN docker-php-ext-install \
     intl mbstring  zip bcmath gd xsl \
     pdo  pdo_pgsql
 
+# Installation de l'extension Redis
+RUN pecl install redis \
+    && docker-php-ext-enable redis
+
 # Installation de Xdebug
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
